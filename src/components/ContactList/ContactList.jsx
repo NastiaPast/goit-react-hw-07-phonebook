@@ -1,37 +1,19 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import {
-  selectError,
-  selectFilteredContacts,
-  selectIsLoading,
-} from 'redux/selectors';
-import { fetchContacts, deleteContact } from 'redux/operations';
+import { selectFilteredContacts } from 'redux/selectors';
+import { deleteContact } from 'redux/operations';
 import { Button, Item, List, Text } from './ContactList.styled';
-import { Loader } from 'components/Loader/Loader';
+import { Notify } from 'notiflix';
 
 const ContactList = () => {
   const dispatch = useDispatch();
   const filteredContacts = useSelector(selectFilteredContacts);
-  const isLoading = useSelector(selectIsLoading);
-  const error = useSelector(selectError);
-
-  useEffect(() => {
-    dispatch(fetchContacts());
-  }, [dispatch]);
-
-  const handleDeleteContact = id => {
+  const handleDeleteContact = (id, name) => {
     dispatch(deleteContact(id));
+    Notify.success(`Contact ${name} deleted`);
   };
 
   return (
     <>
-      {isLoading && <Loader />}
-
-      {!filteredContacts?.length && !error && !isLoading && (
-        <Text>No contacts found.</Text>
-      )}
-
-      {error && <Text>{error}</Text>}
       <List>
         {filteredContacts.map(contact => (
           <Item key={contact.id}>
@@ -39,7 +21,7 @@ const ContactList = () => {
             <Text>{contact.phone}</Text>
             <Button
               type="submit"
-              onClick={() => handleDeleteContact(contact.id)}
+              onClick={() => handleDeleteContact(contact.id, contact.name)}
             >
               Delete
             </Button>

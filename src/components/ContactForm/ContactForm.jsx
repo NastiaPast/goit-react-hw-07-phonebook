@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addContact } from 'redux/operations';
 import { nanoid } from 'nanoid';
 import { Form, Input, Label, Button } from './ContactForm.styled';
+import { Notify } from 'notiflix';
 
 const ContactForm = () => {
   const dispatch = useDispatch();
@@ -12,10 +13,12 @@ const ContactForm = () => {
 
     const name = e.target.elements.name.value;
     const phone = e.target.elements.number.value;
-    const isNameUnique = contacts.every(contact => contact.name !== name);
+    const isNameUnique = contacts.every(
+      contact => contact.name.toLowerCase() !== name.toLowerCase()
+    );
 
     if (!isNameUnique) {
-      alert(`${name} is already in contacts`);
+      Notify.failure(`${name} is already in contacts`);
       return;
     }
 
@@ -24,8 +27,15 @@ const ContactForm = () => {
       name,
       phone,
     };
-    dispatch(addContact(contact));
-    e.target.reset();
+
+    dispatch(addContact(contact))
+      .then(() => {
+        e.target.reset();
+        Notify.success(`${name} is added to contacts`);
+      })
+      .catch(() => {
+        Notify.failure('Failed to add contact');
+      });
   };
 
   return (
